@@ -1,0 +1,32 @@
+{
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@next/font": "13.4.7",
+    "@reduxjs/toolkit": "^1.9.5",
+    "@svgr/webpack": "^8.0.1",
+    "autoprefixer": "^10.4.14",
+    "axios": "^1.4.0",
+    "eslint": "8.43.0",
+    "eslint-config-next": "13.4.7",
+    "next": "13.4.7",
+    "postcss": "^8.4.24",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-particles": "^2.10.1",
+    "react-quizlet-flashcard": "3.0.0",
+    "react-redux": "^8.1.1",
+    "react-tsparticles": "^2.10.1",
+    "redux-persist": "^6.0.0",
+    "socket.io-client": "^4.7.0",
+    "tailwindcss": "^3.3.2",
+    "tsparticles": "^2.10.1"
+  }
+}
