@@ -27,6 +27,7 @@ module.exports = (io, socket, rooms) => {
       const isJoined = room.players.some(
         (player) => player.playerID === payload.player
       );
+
       if (!isJoined) {
         room.players.push({
           socketID: socket.id,
@@ -41,6 +42,11 @@ module.exports = (io, socket, rooms) => {
         if (room.players.length == 2) {
           room.isFull = true;
           room.inMatch = false;
+          // room.curr_question = 0;
+          // room.game_status = "Idle";
+          // room.questionPackage = null;
+          // room.breakTimeInterval = null;
+          // room.answerTimeInterval = null;
           countDown(4, roomName);
         } else {
           room.isFull = false;
@@ -71,6 +77,12 @@ module.exports = (io, socket, rooms) => {
           ],
           isFull: false,
           inMatch: false,
+          curr_question: 0,
+          game_status: "Idle",
+          questionPackage: null,
+          answerRecord: [],
+          breakTimeInterval: null,
+          answerTimeInterval: null,
         };
         rooms.push(room);
         const roomName = room.roomID;
@@ -84,19 +96,20 @@ module.exports = (io, socket, rooms) => {
 
     const roomName = room.roomID;
     io.in(roomName).emit("room:get", room);
-    console.log(room.players);
+    // console.log(room);
     // console.log("find", room.players);
   };
 
   // leaveRoom is just leave the room, not disconnect in this case
-  const leaveRoom = async (payload) => {
-    if (payload.roomID && payload.player) {
+  const leaveRoom = async (payload, getInfo) => {
+    if (payload.roomID && payload.playerID) {
       const roomIdx = rooms.findIndex((room) => room.roomID == payload.roomID);
       const room = rooms[roomIdx];
+
       if (roomIdx != -1 && room.inMatch == false) {
         //delete the room if you are the last in the room
         const isJoined = room.players.some(
-          (player) => player.playerID === payload.player
+          (player) => player.playerID === payload.playerID
         );
 
         if (room.players.length == 1 && isJoined) {
@@ -109,19 +122,22 @@ module.exports = (io, socket, rooms) => {
           }
         } else {
           room.players = room.players.filter(
-            (player) => player.playerID != payload.player
+            (player) => player.playerID != payload.playerID
           );
           room.isFull = false;
         }
         const roomName = room.roomID;
-        io.in(roomName).emit("room:get", room);
+        // if (getInfo == true) io.in(roomName).emit("room:get", room);
+        try {
+          io.in(roomName).emit("room:get", room);
+        } catch (error) {}
         socket.leave(roomName);
         console.log(rooms);
       }
     }
   };
 
-  const disconnect = () => {
+  const disconnect = async () => {
     // disconnect and delete from its room
     for (const roomID of socket.rooms) {
       if (roomID !== socket.id) {
@@ -131,14 +147,9 @@ module.exports = (io, socket, rooms) => {
           const player = currRoom.players.find(
             (player) => player.socketID == socket.id
           );
-          // currRoom.players.forEach((element, index) => {
-          //   console.log(index, "-", element.socketID);
-          // });
-
-          // console.log("my socket id", socket.id);
-          // const payload = { roomID: roomID, player: player.playerID };
-          leaveRoom({ roomID: roomID, player: player.playerID });
-          console.log(player.playerID, "disconnected");
+          io.to(roomID).emit("room:leave_alert", "opponent left the room");
+          leaveRoom({ roomID: roomID, playerID: player?.playerID }, false);
+          console.log(player?.playerID, "disconnected");
         }
       }
     }

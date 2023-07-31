@@ -1,17 +1,31 @@
 import "@/styles/globals.css";
+import { useEffect } from "react";
 import { Provider } from "react-redux";
-import { PersistGate } from "redux-persist/integration/react";
-import { store, persistor } from "@/store";
-import { SocketProvider } from "./context";
+import { store } from "@/store";
+import { AppContextProvider } from "../context/context";
+import { Toaster } from "react-hot-toast";
 
 export default function App({ Component, pageProps }) {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeunload", () => {
+        localStorage.removeItem("isAd");
+      });
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("beforeunload", () => {
+          localStorage.removeItem("isAd");
+        });
+      }
+    };
+  }, []);
   return (
-    <SocketProvider>
+    <AppContextProvider>
       <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-          <Component {...pageProps} />
-        </PersistGate>
+        <Component {...pageProps} />
+        <Toaster />
       </Provider>
-    </SocketProvider>
+    </AppContextProvider>
   );
 }

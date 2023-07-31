@@ -5,6 +5,7 @@ const AccountSchema = new mongoose.Schema({
   name: { type: String },
   email: { type: String },
   photo: { type: String },
+  owned: { type: [mongoose.Schema.Types.ObjectId], ref: "Collection" },
   balance: { type: Number },
 });
 

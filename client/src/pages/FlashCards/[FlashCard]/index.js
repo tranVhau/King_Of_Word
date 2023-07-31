@@ -1,49 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FlashcardArray } from "react-quizlet-flashcard";
 import ParticlesComponent from "@/components/ui/Particles";
+import collectionAPIs from "@/services/api/collection.api";
 
-function FlashCard() {
-  const cards = [
-    {
-      id: 1,
-      frontHTML: (
-        <div>
-          What is the capital of <u>Alaska</u>?
-        </div>
-      ),
-      backHTML: <>Juneau</>,
+export const getStaticProps = async (context) => {
+  const collectionID = context.params.FlashCard;
+  const flashcards = await collectionAPIs.getCollection(collectionID);
+
+  return {
+    props: {
+      flashcards: flashcards.data.data,
     },
-    {
-      id: 2,
-      frontHTML: <>What is the capital of California?</>,
-      backHTML: <>Sacramento</>,
-    },
-    {
-      id: 3,
-      frontHTML: <>What is the capital of New York?</>,
-      backHTML: <>Albany</>,
-    },
-    {
-      id: 4,
-      frontHTML: <>What is the capital of Florida?</>,
-      backHTML: <>Tallahassee</>,
-    },
-    {
-      id: 5,
-      frontHTML: <>What is the capital of Texas?</>,
-      backHTML: <>Austin</>,
-    },
-    {
-      id: 6,
-      frontHTML: <>What is the capital of New Mexico?</>,
-      backHTML: <>Santa Fe</>,
-    },
-    {
-      id: 7,
-      frontHTML: <>What is the capital of Arizona?</>,
-      backHTML: <>Phoenix</>,
-    },
-  ];
+  };
+};
+
+export const getStaticPaths = async () => {
+  return {
+    paths: [],
+    fallback: "blocking",
+  };
+};
+
+function FlashCard({ flashcards }) {
+  const [cards, setCards] = useState([]);
+  useEffect(() => {
+    const modifiedCard = flashcards?.map((card) => {
+      return {
+        ...card,
+        id: card._id,
+        frontHTML: <>{card.front}</>,
+        backHTML: <>{card.back}</>,
+      };
+    });
+    setCards(modifiedCard);
+  }, []);
+
   return (
     <div className="flex flex-col justify-center items-center h-screen">
       <FlashcardArray

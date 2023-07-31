@@ -7,27 +7,51 @@ import CoinsIcon from "../../../public/assets/svgs/coins.svg";
 import LobbyCard from "@/components/card/Lobby";
 import Progress from "@/components/ui/Progress";
 
-import { SocketContext } from "../context";
-
-import { useDispatch, useSelector } from "react-redux";
-import { updateRoom } from "@/store/features/reducers/gameSlice";
-
+import { AppContext } from "../../context/context";
 export async function getServerSideProps(context) {
   const reqCookie = context.req.headers.cookie;
   const data = await userAPIs.me(reqCookie);
-
   return { props: { me: data.data.data } };
 }
 
 function Lobby({ me }) {
-  const socket = useContext(SocketContext);
-  // const dispatch = useDispatch();
+  const { socket } = useContext(AppContext);
   const router = useRouter();
-  // const { roomInfo, isFindMatch } = useSelector((state) => state.game).roomInfo;
   const [roomInfo, setRoomInfo] = useState("");
   const [isFindMatch, setIsFindMatch] = useState(false);
   const [opponent, setOpponent] = useState({});
   const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    socket.connect();
+    // return () => {
+    //   socket.disconnect();
+    // };
+  }, []);
+
+  useEffect(() => {
+    if (roomInfo) {
+      if (roomInfo.players.length == 2) {
+        const opponentInf = roomInfo.players.filter(
+          (player) => player.playerID != me.email
+        );
+        setOpponent(...opponentInf);
+        socket.on("room:count_down", (second) => {
+          setProgress((prev) => (prev += 25));
+          if (second == 0) {
+            setProgress(0);
+            if (roomInfo.isFull) {
+              router.push("/KNGofWRD/Game");
+            }
+          }
+        });
+      } else {
+        setOpponent("room:count_down");
+      }
+    }
+
+    socket.off("");
+  }, [roomInfo]);
 
   const findMatchHandler = () => {
     socket.emit("room:create", {
@@ -43,44 +67,17 @@ function Lobby({ me }) {
     });
   };
 
-  setTimeout(() => {
-    // router.push("/KNGofWRD/Game");
-  }, 3000);
-
   const leaveRoomHandler = () => {
-    socket.emit("room:leave", { roomID: roomInfo.roomID, player: me.email });
+    socket.emit(
+      "room:leave",
+      { roomID: roomInfo.roomID, playerID: me.email },
+      true
+    );
     socket.on("room:get", (payload) => {
-      // console.log("leave Room");
-      // dispatch(updateRoom({ isFindMatch: payload.isFull, roomInfo: payload }));
       setIsFindMatch(payload.isFull);
-      // setProgress(100);
     });
   };
 
-  useEffect(() => {
-    if (roomInfo) {
-      if (roomInfo.players.length == 2) {
-        const opponentInf = roomInfo.players.filter(
-          (player) => player.playerID != me.email
-        );
-        setOpponent(...opponentInf);
-        socket.on("room:count_down", (second) => {
-          // let countDown = 0;
-          console.log(second);
-
-          setProgress((prev) => (prev += 25));
-
-          // countDown += 18;
-          if (second == 0) {
-            setProgress(0);
-            router.push("/KNGofWRD/Game");
-          }
-        });
-      } else {
-        setOpponent("");
-      }
-    }
-  }, [roomInfo]);
   return (
     <div className=" relative h-screen flex flex-col justify-center font-Londrina_Solid select-none bg-my-lobby-bg bg-no-repeat bg-center bg-contain ">
       <Progress
@@ -90,6 +87,7 @@ function Lobby({ me }) {
       <div className="block absolute top-14 left-0 right-0 text-center text-5xl ">
         LOBBY
       </div>
+
       <div className="grid grid-cols-12  place-items-center">
         <div className="col-span-5 text-2xl">
           <LobbyCard info={me} side={"YOU"} />
@@ -139,7 +137,7 @@ function Lobby({ me }) {
       <div className="block absolute bottom-8 left-0 right-0 text-center  pb-4 ">
         <p className="opacity-70">
           Tips: You must have at least{" "}
-          <span className="text-yellow-400 opacity-100"> 60 coins</span> to play
+          <span className="text-yellow-400 opacity-100"> 40 coins</span> to play
         </p>
       </div>
     </div>

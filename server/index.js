@@ -8,6 +8,7 @@ require("./src/services/passport");
 const cors = require("cors");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+const bodyParser = require("body-parser");
 
 const connectionHandler = require("./src/socket/connection.socket");
 const gameHandler = require("./src/socket/game.socket");
@@ -16,7 +17,11 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:8000"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:8000",
+      "https://api-m.sandbox.paypal.com",
+    ],
     credentials: true,
   })
 );
@@ -28,6 +33,8 @@ app.use(
   })
 );
 
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(passport.session());
 

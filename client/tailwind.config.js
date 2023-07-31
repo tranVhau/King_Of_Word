@@ -22,6 +22,8 @@ module.exports = {
         "my-find-match-bg": "url('/assets/images/bg-find-match.png')",
         "my-lobby-bg": "url('/assets/images/my-bg-lobby.png')",
         "my-game-bg": "url('/assets/images/my-bg-game.png')",
+        "my-lose-bg": "url('/assets/images/my-lose-bg.png')",
+        "my-win-bg": "url('/assets/images/my-win-bg.png')",
       },
     },
   },

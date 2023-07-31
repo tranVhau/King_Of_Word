@@ -5,7 +5,7 @@ const {
 } = require("../middlewares/IsAuthenticated.middleware");
 
 router.get("/auth/me", isAuthenticated, (req, res) => {
-  const { googleId, _id, ...info } = req.user._doc;
+  const { googleId, ...info } = req.user._doc;
   res.status(200).json({ data: info });
 });
 

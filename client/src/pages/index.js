@@ -1,28 +1,17 @@
-import React, { useEffect, useState } from "react";
-import socketIOClient from "socket.io-client";
-import { io } from "socket.io-client";
-const socket = io(process.env.NEXT_PUBLIC_BACKEND_SOCKET_URL);
+import React from "react";
 import Image from "next/image";
 import GoogleButton from "@/components/buttons/GoogleButton";
 
 import Sparticles from "../components/ui/Particles";
 
 function Home() {
-  const [roomInfo, setRoomInfo] = useState("");
-  const findMatchHandler = () => {
-    socket.emit("room:create", { value: "haha" });
-  };
+  // const [roomInfo, setRoomInfo] = useState("");
 
-  const getReadyHandler = () => {
-    socket.emit("room:ready", { roomInfo: roomInfo });
-  };
-
-  useEffect(() => {
-    socket.on("room:get", (payload) => {
-      console.log(payload);
-      setRoomInfo(payload);
-    });
-  }, []);
+  // useEffect(() => {
+  //   socket.on("room:get", (payload) => {
+  //     setRoomInfo(payload);
+  //   });
+  // }, []);
 
   const googleLoginHandler = () => {
     window.location.href = "http://localhost:8000/auth/google";

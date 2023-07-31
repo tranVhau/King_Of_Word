@@ -45,6 +45,49 @@ module.exports = (io, socket, rooms) => {
     }, 1000);
   };
 
+  // handle caculate and return live score each round
+  // and total score in the end of the game
+
+  const caculateResult = (room) => {
+    room.answerRecord = [];
+    room.players.forEach((player) => {
+      room.answerRecord.push(player.scoreRecord);
+    });
+
+    for (let i = 0; i < room.answerRecord[0].length; i++) {
+      const player1Record = room.answerRecord[0][i];
+      const player2Record = room.answerRecord[1][i];
+      player1Record.scored = 0;
+      player2Record.scored = 0;
+
+      //if player1 have correct answer
+      if (player1Record.correctAnswer == player1Record.answer) {
+        player1Record.scored += 5;
+        // if 2 players have correct answer
+        if (player2Record.correctAnswer == player2Record.answer) {
+          if (player1Record.duration < player2Record.duration) {
+            player1Record.scored += 3;
+          }
+        } else {
+          player1Record.scored += 3;
+        }
+      }
+
+      if (player2Record.correctAnswer == player2Record.answer) {
+        player2Record.scored += 5;
+        if (player2Record.correctAnswer == player1Record.answer) {
+          if (player2Record.duration < player1Record.duration) {
+            player2Record.scored += 3;
+          }
+        } else {
+          player2Record.scored += 3;
+        }
+      }
+    }
+
+    return [room.answerRecord[0].at(-1), room.answerRecord[1].at(-1)];
+  };
+
   const onGameStart = async (payload) => {
     // re-join the room
     socket.join(payload.roomID);
@@ -52,23 +95,19 @@ module.exports = (io, socket, rooms) => {
     const roomIdx = rooms.findIndex((room) => room.roomID == payload.roomID);
     if (roomIdx != -1) {
       const room = rooms[roomIdx];
-      countDown(4, room);
-      room.curr_question = 0;
-      room.game_status = "Idle";
-      room.questionPackage = null;
-      room.breakTimeInterval = null;
-      room.answerTimeInterval = null;
-
       if (!room.questionPackage) {
-        await Questions.aggregate([{ $sample: { size: 5 } }]).then(
-          (questionPackage) => {
-            room.questionPackage = questionPackage;
-          }
-        );
+        await Questions.aggregate([
+          { $sample: { size: Number(process.env.QUESTIONS_PER_GAME) } },
+        ]).then((questionPackage) => {
+          room.questionPackage = questionPackage;
+        });
       }
-
-      console.log("generate room ", room);
     }
+    room.players.forEach((player) => {
+      if (player.playerID == payload.playerID) player.socketID = socket.id;
+    });
+
+    countDown(process.env.DURATION_OF_BREAK_TIME, room);
   };
 
   // return question for players, start count-down
@@ -77,6 +116,7 @@ module.exports = (io, socket, rooms) => {
     if (roomIdx != -1) {
       const room = rooms[roomIdx];
       const roomName = room.roomID;
+
       const nextQuestion = room.questionPackage[room.curr_question];
       if (
         room.game_status == "Pending" &&
@@ -86,16 +126,15 @@ module.exports = (io, socket, rooms) => {
         question.no = room.curr_question;
         //receive answer and add userRecord each user
         io.to(roomName).emit("game:get_question", question);
+        answerTime(process.env.DURATION_OF_ANSWER_TIME, room);
       } else {
         // handle total score and end game
         console.log("end");
-        io.to(roomName).emit("end_game", {});
+        clearInterval(room.answerTimeInterval);
+        clearInterval(room.breakTimeInterval);
+        room.game_status = "Idle";
+        io.to(roomName).emit("game:finish", room.answerRecord);
       }
-      answerTime(3, room);
-      // room.players.forEach((element, index) => {
-      //   console.log(index, "-", element.socketID);
-      // });
-      // console.log("myID", socket.id);
     }
   };
 
@@ -108,27 +147,32 @@ module.exports = (io, socket, rooms) => {
       const player = room.players.find(
         (player) => player.socketID == socket.id
       );
-      const playerRecordObj = {
-        question: room.curr_question,
-        answer: payload.answer,
-        duration: payload.duration,
-      };
-      player.scoreRecord.push(playerRecordObj);
-      player.ready = true;
+
+      if (player) {
+        const playerRecordObj = {
+          question_id: payload.question_id,
+          player: player.playerID,
+          question: room.curr_question,
+          answer: payload?.answer,
+          correctAnswer: room.questionPackage[room.curr_question]?.correctIdx,
+          duration: payload?.duration,
+        };
+
+        player.scoreRecord.push(playerRecordObj);
+        player.ready = true;
+      }
       // turn to 'break-time': when all player have answer or time-out
       const isAllReady = room.players.every((player) => player.ready == true);
-      if (isAllReady) {
+      if (isAllReady && room.game_status == "Break") {
         room.curr_question += 1;
+        // setImmediate(() => {
+        const result = caculateResult(room);
+        io.to(roomName).emit("round:result", result);
+        // });
+
         room.players.forEach((player) => (player.ready = false));
-        setImmediate(() => {
-          io.to(roomName).emit("round:result", { answer: "answer" });
-        });
         breakTime(4, room);
       }
-      // room.players.forEach((element, index) => {
-      //   console.log(index, "-", element.socketID);
-      // });
-      // console.log("myID", socket.id);
     }
   };
 

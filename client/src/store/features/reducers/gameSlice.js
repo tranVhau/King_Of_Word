@@ -1,24 +1,22 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  isFindMatch: false,
-  roomInfo: {},
+  roundAnswer: {
+    question_id: null,
+    answer: null,
+    duration: null,
+  },
 };
 
 const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {
-    updateRoom: (state, action) => {
-      state.isFindMatch = action.payload.isFindMatch;
-      state.roomInfo = action.payload;
+    updateAnswer: (state, action) => {
+      state.roundAnswer = action.payload;
     },
-    // leaveGame: () => {
-    //   state.isFindMatch = false;
-    //   state.room.roomID = action.payload.roomID;
-    // },
   },
 });
 
-export const { updateRoom } = gameSlice.actions;
+export const { updateAnswer } = gameSlice.actions;
 export default gameSlice.reducer;

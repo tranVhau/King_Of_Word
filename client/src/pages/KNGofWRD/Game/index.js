@@ -1,11 +1,13 @@
 import React, { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import Progress from "@/components/ui/Progress";
-import AnswerBtn from "@/components/ui/AnswerBtn";
+import AnswerBtn from "@/components/buttons/AnswerBtn";
+import CountDown from "@/components/ui/CountDown";
+import Notifies from "utils/notify.util";
 import userAPIs from "@/services/api/user.api";
-import { SocketContext } from "@/pages/context";
-// import { io } from "socket.io-client";
-// const socket = io(process.env.NEXT_PUBLIC_BACKEND_SOCKET_URL);
+import { AppContext } from "@/context/context";
+
+import ScoreBoard from "@/components/popup/ScoreBoard";
 
 export async function getServerSideProps(context) {
   const reqCookie = context.req.headers.cookie;
@@ -15,56 +17,79 @@ export async function getServerSideProps(context) {
 }
 
 function Game({ me }) {
-  const socket = useContext(SocketContext);
+  const {
+    socket,
+    roundAnswer,
+    setRoundAnswer,
+    start,
+    setStart,
+    setScoreBoard,
+  } = useContext(AppContext);
+
   const [selectedButton, setSelectedButton] = useState(null);
   const [timeLeft, setTimeLeft] = useState(100);
   const [questionPackage, setQuestionPackage] = useState("");
+  const [roundResult, setRoundResult] = useState("");
+  const [roundPoint, setRoundPoint] = useState({ mePts: 0, opponentPts: 0 });
+  const [openScoreBoard, setOpenScoreBoard] = useState(false);
 
-  const [timeName, setTimeName] = useState("");
-  const [time, setTime] = useState();
+  useEffect(() => {
+    socket.connect();
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     socket.emit("game:start", {
       roomID: localStorage.getItem("roomID"),
-      player: me.email,
+      playerID: me.email,
     });
 
-    socket.on("room:count_down", (second) => {
+    function onCountDown(second) {
       setTimeLeft((prev) => (prev -= 20));
       if (second == 0) {
         setTimeLeft(100);
         socket.emit("game:next", { roomID: localStorage.getItem("roomID") });
+        setStart(Date.now());
       }
-    });
+    }
 
-    socket.on("room:answer_time", (second) => {
-      setTimeName("Answer Time");
-
-      setTime(second);
-      if (second == 0) {
-        socket.emit("round:answer", {
-          answer: "dummy",
-          duration: "dummy",
-          roomID: localStorage.getItem("roomID"),
-        });
-      }
-    });
-
-    socket.on("room:break_time", (second) => {
-      setTimeName("Break Time");
-      setTime(second);
-      if (second == 0) {
-        socket.emit("game:next", { roomID: localStorage.getItem("roomID") });
-      }
-    });
-
-    socket.on("game:get_question", (question) => {
+    function onGetQuestion(question) {
       setQuestionPackage(question);
-    });
+    }
+
+    function onRoundResult(result) {
+      result.forEach((record) => {
+        if (record.player == me.email) {
+          roundPoint.mePts += record.scored;
+        } else {
+          roundPoint.opponentPts += record.scored;
+        }
+      });
+      setRoundResult(result[0]);
+    }
+
+    function onGameFinish(payload) {
+      setScoreBoard(payload);
+      setOpenScoreBoard(true);
+    }
+    function onLeaveNotify(payload) {
+      Notifies.notify(payload, "🏃‍♂️");
+    }
+
+    socket.on("room:leave_alert", onLeaveNotify);
+    socket.on("room:count_down", onCountDown);
+    socket.on("game:get_question", onGetQuestion);
+    socket.on("round:result", onRoundResult);
+    socket.on("game:finish", onGameFinish);
 
     return () => {
-      socket.off("room:break_time");
-      socket.off("room:answer_time");
+      socket.off("room:leave_alert", onLeaveNotify);
+      socket.off("room:count_down", onCountDown);
+      socket.off("game:get_question", onGetQuestion);
+      socket.off("round:result", onRoundResult);
+      socket.off("game:finish", onGameFinish);
     };
   }, []);
 
@@ -72,13 +97,13 @@ function Game({ me }) {
     e.preventDefault();
     setSelectedButton(e.target.value);
     e.target.isSelected = true;
-    socket.emit("round:answer", {
+    setRoundAnswer({
       question_id: questionPackage?._id,
       answer: e.target.value,
-      roomID: localStorage.getItem("roomID"),
+      duration: Math.abs((start - Date.now()) / 1000).toFixed(2),
     });
   };
-  // console.log(questionPackage);
+
   return (
     <div className="relative h-screen flex flex-col justify-center items-center font-Londrina_Solid bg-my-game-bg bg-center bg-contain bg-no-repeat">
       <Progress
@@ -99,27 +124,31 @@ function Game({ me }) {
             src={require("../../../../public/assets/images/logo-black.png")}
           />
         </div>
-        <div className="flex justify-center col-span-12">
-          <span
-            className={`mx-4 ${
-              timeName != "Break Time" ? "text-red-600" : "text-green-600"
-            }`}
-          >
-            {timeName}
-          </span>{" "}
-          <span>{time >= 0 ? time + "s" : "  "}</span>
-        </div>
+
+        <CountDown
+          socket={socket}
+          setSelectedButton={setSelectedButton}
+          setRoundResult={setRoundResult}
+          setRoundAnswer={setRoundAnswer}
+          roundAnswer={roundAnswer}
+        />
 
         <div className=" col-start-2 col-span-5   ">
           You
-          <Progress style={"bg-green-400"} progress={20}>
-            20/60 pts
+          <Progress
+            style={`${roundPoint.mePts == 0 ? "" : "bg-green-400"}`}
+            progress={(roundPoint.mePts / 40) * 100}
+          >
+            {`${roundPoint.mePts}/40`}
           </Progress>
         </div>
         <div className=" col-end col-span-5  ">
           Opponent
-          <Progress style={"bg-red-400"} progress={50}>
-            20/60 pts
+          <Progress
+            style={`${roundPoint.opponentPts == 0 ? "" : "bg-red-400"}`}
+            progress={(roundPoint.opponentPts / 40) * 100}
+          >
+            {`${roundPoint.opponentPts}/40`}
           </Progress>
         </div>
         <div className="relative col-start-2 col-span-10 bg-my-softer-golden p-8 rounded-lg ">
@@ -129,7 +158,7 @@ function Game({ me }) {
           {`${
             questionPackage
               ? questionPackage?.question
-              : "Loading your question"
+              : "Preparing your questions"
           }`}
         </div>
         <div className="grid grid-cols-2 gap-2 col-start-2 col-span-10 ">
@@ -138,11 +167,28 @@ function Game({ me }) {
               <AnswerBtn
                 key={index}
                 value={index}
-                style={
+                style={`
+                ${
                   selectedButton == index
                     ? "bg-slate-400 hover:bg-slate-300"
                     : ""
                 }
+                ${
+                  roundResult?.correctAnswer == index
+                    ? "bg-green-400 hover:bg-green-400"
+                    : ""
+                }
+                ${
+                  roundResult && roundResult?.correctAnswer != index
+                    ? "bg-red-400 hover:bg-red-400"
+                    : ""
+                }
+                ${
+                  selectedButton == index && roundResult?.correctAnswer == index
+                    ? "bg-yellow-400 hover:bg-yellow-500"
+                    : ""
+                }
+              `}
                 isCorrect={false}
                 isSelected={false}
                 onClick={onAnswerHandler}
@@ -158,39 +204,16 @@ function Game({ me }) {
               <AnswerBtn>?</AnswerBtn>
             </>
           )}
-          {/* <AnswerBtn
-            style={selectedButton == 1 ? "bg-slate-400 hover:bg-slate-300" : ""}
-            value={1}
-            isCorrect={false}
-            isSelected={false}
-            onClick={onAnswerHandler}
-          >
-            Anwers 2
-          </AnswerBtn>
-          <AnswerBtn
-            style={selectedButton == 2 ? "bg-slate-400 hover:bg-slate-300" : ""}
-            value={2}
-            isCorrect={false}
-            isSelected={false}
-            onClick={onAnswerHandler}
-          >
-            Anwers 3
-          </AnswerBtn>
-          <AnswerBtn
-            value={3}
-            // style={"bg-slate-400 hover:bg-slate-300 "}
-            style={selectedButton == 3 ? "bg-slate-400 hover:bg-slate-300" : ""}
-            isCorrect={false}
-            isSelected={false}
-            onClick={onAnswerHandler}
-          >
-            Anwers 4
-          </AnswerBtn> */}
         </div>
       </div>
       <div className="block absolute bottom-8 left-0 right-0 text-center opacity-50 pb-4 ">
         <p> Tips: Choose the best answer to the question</p>
       </div>
+      <ScoreBoard
+        openScoreBoard={openScoreBoard}
+        setOpenScoreBoard={setOpenScoreBoard}
+        me={me}
+      />
     </div>
   );
 }
