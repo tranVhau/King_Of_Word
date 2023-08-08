@@ -6,6 +6,7 @@ import Spinner from "@/components/ui/Spinner";
 import CoinsIcon from "../../../public/assets/svgs/coins.svg";
 import LobbyCard from "@/components/card/Lobby";
 import Progress from "@/components/ui/Progress";
+import Notifies from "utils/notify.util";
 
 import { AppContext } from "../../context/context";
 export async function getServerSideProps(context) {
@@ -54,6 +55,10 @@ function Lobby({ me }) {
   }, [roomInfo]);
 
   const findMatchHandler = () => {
+    if (me.balance < 40) {
+      Notifies.error("Insufficient balance");
+      return;
+    }
     socket.emit("room:create", {
       player: me.email,
       photo: me.photo,
@@ -79,7 +84,7 @@ function Lobby({ me }) {
   };
 
   return (
-    <div className=" relative h-screen flex flex-col justify-center font-Londrina_Solid select-none bg-my-lobby-bg bg-no-repeat bg-center bg-contain ">
+    <div className=" relative h-screen flex flex-col justify-center font-Londrina_Solid select-none bg-my-lobby-bg bg-no-repeat bg-center bg-cover ">
       <Progress
         style={"fixed top-0 bg-my-golden-color"}
         progress={progress}

@@ -5,8 +5,10 @@ const CountDown = memo(function CountDown({
   socket,
   setSelectedButton,
   setRoundResult,
+  timeName,
+  setTimeName,
 }) {
-  const [timeName, setTimeName] = useState("");
+  // for time count down
   const [time, setTime] = useState();
   const { roundAnswer, setRoundAnswer, setStart } = useContext(AppContext);
 

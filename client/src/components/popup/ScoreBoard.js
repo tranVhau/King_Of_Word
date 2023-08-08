@@ -39,13 +39,13 @@ const ScoreBoard = memo(function ScoreBoard({
       className={` ${
         openScoreBoard ? "" : "hidden"
       } fixed top-0 left-0 right-0 z-50 w-full p-2  overflow-x-hidden overflow-y-auto md:inset-0 h-full ${
-        myPoint > opponentPoint ? "bg-my-softer-golden" : "bg-red-400"
+        myPoint >= opponentPoint ? "bg-my-softer-golden" : "bg-red-400"
       }`}
     >
       <div className="relative w-full h-full">
         <div
-          className={`relative bg-white rounded-lg shadow bg-no-repeat bg-center bg-contain ${
-            myPoint > opponentPoint ? " bg-my-win-bg" : " bg-my-lose-bg"
+          className={`relative bg-white rounded-lg shadow bg-no-repeat bg-center bg-cover ${
+            myPoint >= opponentPoint ? " bg-my-win-bg" : " bg-my-lose-bg"
           } `}
         >
           <div className="p-6 space-y-6">
@@ -56,7 +56,7 @@ const ScoreBoard = memo(function ScoreBoard({
               <div className="grid grid-cols-12  place-items-center">
                 <div className="col-span-5 text-2xl"></div>
                 <div className="col-span-2">
-                  {myPoint > opponentPoint ? (
+                  {myPoint >= opponentPoint ? (
                     <p className="text-5xl text-yellow-400">WIN</p>
                   ) : (
                     <p className="text-5xl text-red-600">LOSE</p>

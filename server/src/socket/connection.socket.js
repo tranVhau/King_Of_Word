@@ -42,11 +42,6 @@ module.exports = (io, socket, rooms) => {
         if (room.players.length == 2) {
           room.isFull = true;
           room.inMatch = false;
-          // room.curr_question = 0;
-          // room.game_status = "Idle";
-          // room.questionPackage = null;
-          // room.breakTimeInterval = null;
-          // room.answerTimeInterval = null;
           countDown(4, roomName);
         } else {
           room.isFull = false;

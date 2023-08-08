@@ -1,4 +1,5 @@
-const { Questions } = require("../models");
+const mongoose = require("mongoose");
+const { Questions, Accounts } = require("../models");
 
 module.exports = (io, socket, rooms) => {
   //count down time
@@ -88,6 +89,48 @@ module.exports = (io, socket, rooms) => {
     return [room.answerRecord[0].at(-1), room.answerRecord[1].at(-1)];
   };
 
+  const coinTransaction = async (record) => {
+    try {
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      const summaryRecord = [
+        {
+          player: record[0][0].player,
+          score:
+            record[0]?.reduce(
+              (accumulator, value) => accumulator + value.scored,
+              0
+            ) -
+            record[1]?.reduce(
+              (accumulator, value) => accumulator + value.scored,
+              0
+            ),
+        },
+        {
+          player: record[1][0].player,
+          score:
+            record[1]?.reduce(
+              (accumulator, value) => accumulator + value.scored,
+              0
+            ) -
+            record[0]?.reduce(
+              (accumulator, value) => accumulator + value.scored,
+              0
+            ),
+        },
+      ];
+      summaryRecord.forEach(async (record) => {
+        await Accounts.findOneAndUpdate(
+          { email: record.player },
+          { $inc: { balance: record.score } }
+        );
+      });
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+    }
+  };
+
   const onGameStart = async (payload) => {
     // re-join the room
     socket.join(payload.roomID);
@@ -111,7 +154,7 @@ module.exports = (io, socket, rooms) => {
   };
 
   // return question for players, start count-down
-  const onNextQuestion = (payload) => {
+  const onNextQuestion = async (payload) => {
     const roomIdx = rooms.findIndex((room) => room.roomID == payload.roomID);
     if (roomIdx != -1) {
       const room = rooms[roomIdx];
@@ -129,9 +172,12 @@ module.exports = (io, socket, rooms) => {
         answerTime(process.env.DURATION_OF_ANSWER_TIME, room);
       } else {
         // handle total score and end game
-        console.log("end");
         clearInterval(room.answerTimeInterval);
         clearInterval(room.breakTimeInterval);
+        // coin transaction
+        if (room.game_status != "Idle") {
+          await coinTransaction(room.answerRecord);
+        }
         room.game_status = "Idle";
         io.to(roomName).emit("game:finish", room.answerRecord);
       }
@@ -177,9 +223,9 @@ module.exports = (io, socket, rooms) => {
   };
 
   //caculate the result
-  const onGameEnd = () => {};
+  // const onGameEnd = () => {};
   socket.on("game:start", onGameStart);
   socket.on("game:next", onNextQuestion);
   socket.on("round:answer", onAnswer);
-  socket.on("game:end", onGameEnd);
+  // socket.on("game:end", onGameEnd);
 };

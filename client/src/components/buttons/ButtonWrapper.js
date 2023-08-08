@@ -46,7 +46,8 @@ function ButtonWrapper({ currency, showSpinner, choosenPackage, user_id }) {
             );
 
             if (!response.ok) {
-              Notifies.error("unexpected error");
+              const data = await response.json();
+              Notifies.error(data.message);
               return;
             }
 

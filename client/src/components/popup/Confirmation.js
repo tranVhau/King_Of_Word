@@ -40,7 +40,7 @@ function Confirmation({ isOpenConfirm, setIsOpenConfirm, collectionInfo, me }) {
         className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-fit flex justify-center items-center z-50 font-Londrina_Solid `}
       >
         <div className="p-6 w-full rounded-md shadow-xl  bg-white">
-          <div className="flex justify-center flex-col">
+          <div className="flex justify-center flex-col text-center">
             Do you want to unlock this collection?
             <div className="flex justify-around pt-4">
               <button

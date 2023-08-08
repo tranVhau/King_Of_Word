@@ -25,7 +25,7 @@ router.get(
 );
 
 //logout
-router.get("/auth/logout", function (req, res, next) {
+router.post("/auth/logout", function (req, res, next) {
   req.logout(function (err) {
     if (err) {
       return next(err);

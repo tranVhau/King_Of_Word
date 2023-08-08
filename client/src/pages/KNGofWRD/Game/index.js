@@ -26,12 +26,20 @@ function Game({ me }) {
     setScoreBoard,
   } = useContext(AppContext);
 
+  // for answer that selected
   const [selectedButton, setSelectedButton] = useState(null);
+  // for time left when start the game(handle count down progress bar)
   const [timeLeft, setTimeLeft] = useState(100);
+  // for store each question and 4 answer each round
   const [questionPackage, setQuestionPackage] = useState("");
+  // for store answer each round
   const [roundResult, setRoundResult] = useState("");
+  // for store round point of opponent and user
   const [roundPoint, setRoundPoint] = useState({ mePts: 0, opponentPts: 0 });
+  // when the game end, toggle the score board
   const [openScoreBoard, setOpenScoreBoard] = useState(false);
+  // time name of each progress: 'Answer Time' & 'Break Time'
+  const [timeName, setTimeName] = useState("");
 
   useEffect(() => {
     socket.connect();
@@ -105,7 +113,7 @@ function Game({ me }) {
   };
 
   return (
-    <div className="relative h-screen flex flex-col justify-center items-center font-Londrina_Solid bg-my-game-bg bg-center bg-contain bg-no-repeat">
+    <div className="relative h-screen flex flex-col justify-center items-center font-Londrina_Solid bg-my-game-bg bg-center bg-cover bg-no-repeat">
       <Progress
         style={`fixed top-0 bg-my-golden-color p-2 rounded-sm ${
           timeLeft == 100 || timeLeft == 0 ? "hidden" : ""
@@ -131,6 +139,8 @@ function Game({ me }) {
           setRoundResult={setRoundResult}
           setRoundAnswer={setRoundAnswer}
           roundAnswer={roundAnswer}
+          timeName={timeName}
+          setTimeName={setTimeName}
         />
 
         <div className=" col-start-2 col-span-5   ">
@@ -161,7 +171,11 @@ function Game({ me }) {
               : "Preparing your questions"
           }`}
         </div>
-        <div className="grid grid-cols-2 gap-2 col-start-2 col-span-10 ">
+        <div
+          className={`grid grid-cols-2 gap-2 col-start-2 col-span-10 ${
+            timeName == "Break Time" && "pointer-events-none"
+          } `}
+        >
           {questionPackage ? (
             questionPackage?.answers.map((answer, index) => (
               <AnswerBtn

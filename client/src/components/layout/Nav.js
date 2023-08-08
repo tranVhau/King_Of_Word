@@ -5,10 +5,16 @@ import PowerIcon from "../../../public/assets/svgs/power.svg";
 import XIcon from "../../../public/assets/svgs/X.svg";
 import MenuIcon from "../../../public/assets/svgs/menu-burger.svg";
 import Image from "next/image";
+import userAPIs from "@/services/api/user.api";
 
 const NavLinks = ({ me, setIsOpen }) => {
-  const logoutHandler = () => {
-    setIsOpen(false);
+  const logoutHandler = async () => {
+    try {
+      const response = await userAPIs.logout();
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <>
