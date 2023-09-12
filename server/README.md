@@ -19,8 +19,8 @@ DURATION_OF_BREAK_TIME=4
 DURATION_OF_ANSWER_TIME=10
 #for oauth2
 CALLBACK_URL=http://localhost:8001/auth/google/callback
-GOOGLE_CLIENT_ID=330173666886-31ef87s1raimrdk67b2756jfafnh5ngu.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+GOOGLE_CLIENT_ID= <config at google cloud console>
+GOOGLE_CLIENT_SECRET=<config at google cloud console>
 #for paypal
 PAYPAL_CLIENT_ID=ASib_kN0YpfyOTTrZOI0cjNIszkdXEZrgBI_qSNi1uoXTLSiBPTHE95nT_miWzEiChLQDlhUffenT3kL
 PAYPAL_SECRET_ID=ECzyQBb2vXVT9EN6rhvAV56QbAVW2fvqW7xSCNPmVvJMJLtRCJw00QC2bnB2TAsr6ofjL0zcbPR1zgNr
