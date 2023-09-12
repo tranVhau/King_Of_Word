@@ -1,10 +1,18 @@
 import axios from "axios";
+import getConfig from "next/config";
+const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
+const socketURL =
+  serverRuntimeConfig.socketURL || publicRuntimeConfig.socketURL;
+
+console.log("server: ", serverRuntimeConfig.socketURL);
+console.log("public: ", publicRuntimeConfig.socketURL);
+console.log("MY ENV >>>", socketURL);
 
 const axiosClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_SOCKET_URL,
+  baseURL: socketURL,
   timeout: 10000,
+  withCredentials: true,
 });
-
 // Add a request interceptor
 axiosClient.interceptors.request.use(
   function (config) {

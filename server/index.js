@@ -18,8 +18,8 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "http://localhost:3000",
-      "http://localhost:8000",
+      process.env.CLIENT_URL,
+      process.env.SERVER_URL,
       "https://api-m.sandbox.paypal.com",
     ],
     credentials: true,
@@ -42,7 +42,7 @@ routes(app);
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_URL,
     credentials: true,
   },
 });

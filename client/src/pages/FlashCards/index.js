@@ -100,7 +100,7 @@ function FlashCards({ collections, me, priceList }) {
         isClose={isClose}
         setClose={setClose}
         priceList={priceList}
-        user_id={me._id}
+        user_id={me?._id}
       />
       <Confirmation
         isOpenConfirm={isOpenConfirm}

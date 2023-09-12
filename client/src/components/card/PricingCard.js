@@ -9,7 +9,7 @@ function PricingCard(props) {
         props.choosenCard == props.value
           ? "border-4 border-green-600"
           : "border-2 border-slate-200"
-      } max-w-xs p-4 bg-white rounded-lg shadow-lg w-full sm:w-72 mx-6 `}
+      } max-w-xs p-4 bg-white rounded-lg shadow-lg w-full sm:w-72 md:mx-6 mx-2`}
     >
       <div
         className={`${

@@ -25,13 +25,20 @@ router.get(
 );
 
 //logout
-router.post("/auth/logout", function (req, res, next) {
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
-    }
-    res.status(200).json({ message: "logout successfully" });
-  });
+router.get("/auth/logout", (req, res) => {
+  // Clear the session and destroy the session object
+  req.session = null;
+  res.clearCookie("session");
+  res.clearCookie("session.sig");
+  res.clearCookie("session");
+  res.status(200).json({ message: "Logged out successfully" });
+});
+
+// for checking
+
+// for checking
+router.get("/", (req, res) => {
+  res.send("KNGofWRD server");
 });
 
 module.exports = router;

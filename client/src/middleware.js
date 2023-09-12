@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 
 export default function middleware(req) {
   const authenticated = req.cookies.get("session");
-  const { pathname } = req.nextUrl;
+  const { pathname, origin } = req.nextUrl;
 
   if (!authenticated && pathname != "/") {
-    return NextResponse.redirect(new URL("http://localhost:3000/"));
+    return NextResponse.redirect(new URL("/"));
   }
 
-  if (authenticated && pathname == "/") {
-    return NextResponse.redirect("http://localhost:3000/FlashCards");
+  if (authenticated && pathname == `${origin}/`) {
+    return NextResponse.redirect(`${origin}/FlashCards`);
   }
 }
 

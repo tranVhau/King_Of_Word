@@ -1,0 +1,5 @@
+.gitignore
+.next/                
+.dockerignore
+node_modules/   
+Dockekfile

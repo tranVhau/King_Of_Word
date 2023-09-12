@@ -6,7 +6,6 @@ import ButtonWrapper from "../buttons/ButtonWrapper";
 function Pricing({ isClose, setClose, priceList, user_id }) {
   const [choosenCard, setChoosenCard] = useState(priceList[1]._id);
   const [choosenPackage, setChoosenPackage] = useState(priceList[1].price);
-
   useEffect(() => {
     const myPackage = priceList.filter((item) => item._id == choosenCard)[0];
     setChoosenPackage(myPackage);
@@ -32,7 +31,7 @@ function Pricing({ isClose, setClose, priceList, user_id }) {
           !isClose ? "" : "translate-y-full invisible"
         } duration-200`}
       >
-        <div className="pt-10 px-6 w-11/12 md:w-10/12  rounded-md shadow-xl  bg-white">
+        <div className="pt-10 px-6 w-11/12 md:w-10/12 rounded-md shadow-xl bg-white">
           <div className="flex justify-center">
             {priceList.map((card) => (
               <PricingCard

@@ -5,6 +5,11 @@ import Notifies from "utils/notify.util";
 import { useRouter } from "next/router";
 // This values are the props in the UI
 
+import getConfig from "next/config";
+const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
+const socketURL =
+  serverRuntimeConfig.socketURL || publicRuntimeConfig.socketURL;
+
 function ButtonWrapper({ currency, showSpinner, choosenPackage, user_id }) {
   const router = useRouter();
   const [{ options, isPending }, dispatch] = usePayPalScriptReducer();
@@ -33,17 +38,14 @@ function ButtonWrapper({ currency, showSpinner, choosenPackage, user_id }) {
         fundingSource={"paypal"}
         createOrder={async (data, actions) => {
           try {
-            const response = await fetch(
-              "http://localhost:8000/client/api/orders",
-              {
-                method: "POST",
-                headers: {
-                  Accept: "application/json",
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ ...choosenPackage, user_id }),
-              }
-            );
+            const response = await fetch(`${socketURL}/client/api/orders`, {
+              method: "POST",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ ...choosenPackage, user_id }),
+            });
 
             if (!response.ok) {
               const data = await response.json();
@@ -61,7 +63,7 @@ function ButtonWrapper({ currency, showSpinner, choosenPackage, user_id }) {
           console.log(data);
           try {
             const response = await fetch(
-              `http://localhost:8000/client/api/orders/${data.orderID}/capture`,
+              `${socketURL}/client/api/orders/${data.orderID}/capture`,
               {
                 method: "POST",
                 headers: {

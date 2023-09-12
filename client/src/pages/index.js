@@ -1,20 +1,15 @@
 import React from "react";
 import Image from "next/image";
 import GoogleButton from "@/components/buttons/GoogleButton";
-
 import Sparticles from "../components/ui/Particles";
 
+import getConfig from "next/config";
+const { publicRuntimeConfig } = getConfig();
+const google_auth_url = publicRuntimeConfig.googleURL;
+
 function Home() {
-  // const [roomInfo, setRoomInfo] = useState("");
-
-  // useEffect(() => {
-  //   socket.on("room:get", (payload) => {
-  //     setRoomInfo(payload);
-  //   });
-  // }, []);
-
   const googleLoginHandler = () => {
-    window.location.href = "http://localhost:8000/auth/google";
+    window.location.href = google_auth_url;
   };
 
   return (

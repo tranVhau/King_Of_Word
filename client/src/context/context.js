@@ -1,6 +1,12 @@
 import React, { createContext, useState } from "react";
 import { io } from "socket.io-client";
-const socket = io(process.env.NEXT_PUBLIC_BACKEND_SOCKET_URL);
+
+import getConfig from "next/config";
+const { serverRuntimeConfig, publicRuntimeConfig } = getConfig();
+const socketURL =
+  serverRuntimeConfig.socketURL || publicRuntimeConfig.socketURL;
+
+const socket = io(socketURL);
 
 export const AppContext = createContext();
 export function AppContextProvider({ children }) {

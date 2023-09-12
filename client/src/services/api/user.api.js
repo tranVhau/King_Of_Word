@@ -5,8 +5,8 @@ const userAPIs = {
     return await axiosClient.get(url, { headers: { Cookie: reqCookie } });
   },
   logout: async () => {
-    const url = "http://localhost:8000/auth/logout";
-    const response = await axiosClient.post(url, null, {
+    const url = "/auth/logout";
+    const response = await axiosClient.get(url, {
       withCredentials: true,
     });
     return response.data;

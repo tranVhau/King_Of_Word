@@ -6,12 +6,16 @@ import XIcon from "../../../public/assets/svgs/X.svg";
 import MenuIcon from "../../../public/assets/svgs/menu-burger.svg";
 import Image from "next/image";
 import userAPIs from "@/services/api/user.api";
+import Notifies from "utils/notify.util";
+import { useRouter } from "next/router";
 
 const NavLinks = ({ me, setIsOpen }) => {
+  const router = useRouter();
   const logoutHandler = async () => {
     try {
       const response = await userAPIs.logout();
-      console.log(response);
+      Notifies.success(`${response.message} 🏃‍♂️ `);
+      router.push("/");
     } catch (error) {
       console.log(error);
     }

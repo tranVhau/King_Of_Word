@@ -7,24 +7,38 @@ const {
   isAuthenticated,
 } = require("../middlewares/IsAuthenticated.middleware");
 
+// router.get("/collections", isAuthenticated, CollectionController.index);
 router.get("/collections", isAuthenticated, CollectionController.index);
+
 router.get("/collection/:id", CollectionController.show);
-router.post("/collection/store", CollectionController.store);
-router.delete("/collection/delete/:id", CollectionController.destroy);
-router.put("/collection", CollectionController.update);
+router.post("/collection/store", isAuthenticated, CollectionController.store);
+router.delete(
+  "/collection/delete/:id",
+  isAuthenticated,
+  CollectionController.destroy
+);
+router.put("/collection", isAuthenticated, CollectionController.update);
 
 // flash Card
 router.get("/flashcards", FlashCardController.index);
-router.post("/flashcard/store", FlashCardController.store);
-router.delete("/flashcard/delete/:id", FlashCardController.destroy);
-router.put("/flashcard", FlashCardController.update);
+router.post("/flashcard/store", isAuthenticated, FlashCardController.store);
+router.delete(
+  "/flashcard/delete/:id",
+  isAuthenticated,
+  FlashCardController.destroy
+);
+router.put("/flashcard", isAuthenticated, FlashCardController.update);
 
 // Category
-router.get("/categories", CategoryController.index);
-router.get("/category/:id", CategoryController.show);
-router.post("/category/store", CategoryController.store);
-router.delete("/category/delete/:id", CategoryController.destroy);
-router.put("/category", CategoryController.update);
+router.get("/categories", isAuthenticated, CategoryController.index);
+router.get("/category/:id", isAuthenticated, CategoryController.show);
+router.post("/category/store", isAuthenticated, CategoryController.store);
+router.delete(
+  "/category/delete/:id",
+  isAuthenticated,
+  CategoryController.destroy
+);
+router.put("/category", isAuthenticated, CategoryController.update);
 
 //Question
 router.get("/question/:id", QuestionController.show);

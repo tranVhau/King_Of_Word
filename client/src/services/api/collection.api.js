@@ -20,13 +20,13 @@ const collectionAPIs = {
   },
 
   purchaseCollection: async (payload) => {
-    const url = `http://localhost:8000/client/api/collection/payment`;
-    return await axios.post(url, payload, { withCredentials: true });
+    const url = `/client/api/collection/payment`;
+    return await axiosClient.post(url, payload, { withCredentials: true });
   },
 
   purchasePackage: async (payload) => {
-    const url = `http://localhost:8000/client/api/package/payment`;
-    return await axios.post(url, payload, { withCredentials: true });
+    const url = `/client/api/package/payment`;
+    return await axiosClient.post(url, payload, { withCredentials: true });
   },
 };
 
