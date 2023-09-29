@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  # server service
+  backend:
+    build: ./server
+    container_name: kngofwrd_api
+    ports:
+      - 8001:8001
+    env_file:
+      - .env
+    networks:
+      - mynetwork
+
+  # frontend service
+  frontend:
+    build: ./client
+    container_name: kngofwrd_ui
+    ports:
+      - 3001:3001
+    env_file:
+      - ./client/.env
+    depends_on:
+      - backend
+    networks:
+      - mynetwork
+networks:
+  mynetwork:
+    external: true

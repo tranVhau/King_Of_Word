@@ -21,4 +21,5 @@ const conn = mongoose
     console.log(`on mongoDB connected: ${error}`);
   });
 
-module.exports = conn;
+// module.exports = conn;
+// export default conn;

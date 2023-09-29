@@ -25,6 +25,7 @@ passport.use(
             photo: profile.photos[0].value,
             googleId: profile.id,
             balance: 200,
+            isAmin: false,
           });
           const newAcc = await acc.save();
           // console.log("newAcc", newAcc);

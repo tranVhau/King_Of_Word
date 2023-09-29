@@ -6,6 +6,7 @@ const AccountSchema = new mongoose.Schema({
   email: { type: String },
   photo: { type: String },
   owned: { type: [mongoose.Schema.Types.ObjectId], ref: "Collection" },
+  isAdmin: { type: Boolean },
   balance: { type: Number },
 });
 

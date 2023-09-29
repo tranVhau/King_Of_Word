@@ -1,4 +1,5 @@
 const { Collections, Categories, FlashCards, Accounts } = require("../models");
+const { collection } = require("../models/Accounts.model");
 
 const index = async (req, res) => {
   const { contributor, tag, owned } = req.query;
@@ -121,7 +122,7 @@ const destroy = async (req, res) => {
     if (!id) {
       return res.status(400).json({ data: "the request data is required" });
     }
-    const targetCollection = Collections.findByIdAndDelete(id);
+    const targetCollection = await Collections.findByIdAndDelete(id);
     if (targetCollection) {
       return res.status(201).json({ data: targetCollection });
     } else {
@@ -133,7 +134,23 @@ const destroy = async (req, res) => {
 };
 
 const update = async (req, res) => {
-  Collections.updateOne();
+  const { id } = req.params;
+  const { price, categories } = req.body;
+  try {
+    if (!id || !price || !collection) {
+      return res.status(400).json({ message: "bad request" });
+    }
+    const update = { price: price, categories: categories };
+    const targetCollection = await Collections.findByIdAndUpdate(id, update, {
+      new: true,
+    });
+    res.status(201).json({
+      data: targetCollection,
+      message: "collection updated successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 module.exports = { index, show, store, destroy, update };

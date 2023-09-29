@@ -5,45 +5,90 @@ const FlashCardController = require("../controllers/FlashCard.controller");
 const CollectionController = require("../controllers/Collection.controller");
 const {
   isAuthenticated,
+  isAdmin,
 } = require("../middlewares/IsAuthenticated.middleware");
 
 // router.get("/collections", isAuthenticated, CollectionController.index);
 router.get("/collections", isAuthenticated, CollectionController.index);
-
 router.get("/collection/:id", CollectionController.show);
-router.post("/collection/store", isAuthenticated, CollectionController.store);
+router.post(
+  "/collection/store",
+  isAdmin,
+  isAuthenticated,
+  CollectionController.store
+);
+// router.post("/collection/store", CollectionController.store);
+
 router.delete(
   "/collection/delete/:id",
   isAuthenticated,
+  isAdmin,
   CollectionController.destroy
 );
-router.put("/collection", isAuthenticated, CollectionController.update);
+router.put(
+  "/collection/update/:id",
+  isAuthenticated,
+  isAdmin,
+  CollectionController.update
+);
 
 // flash Card
-router.get("/flashcards", FlashCardController.index);
 router.post("/flashcard/store", isAuthenticated, FlashCardController.store);
 router.delete(
   "/flashcard/delete/:id",
   isAuthenticated,
+  isAdmin,
   FlashCardController.destroy
 );
-router.put("/flashcard", isAuthenticated, FlashCardController.update);
+router.put(
+  "/flashcard/update/:id",
+  isAuthenticated,
+  isAdmin,
+  FlashCardController.update
+);
 
 // Category
 router.get("/categories", isAuthenticated, CategoryController.index);
 router.get("/category/:id", isAuthenticated, CategoryController.show);
-router.post("/category/store", isAuthenticated, CategoryController.store);
+router.post(
+  "/category/store",
+  isAuthenticated,
+  isAdmin,
+  CategoryController.store
+);
 router.delete(
   "/category/delete/:id",
   isAuthenticated,
+  isAdmin,
   CategoryController.destroy
 );
-router.put("/category", isAuthenticated, CategoryController.update);
+router.put(
+  "/category/update/:id",
+  isAuthenticated,
+  isAdmin,
+  CategoryController.update
+);
 
 //Question
+router.get("/questions", QuestionController.index);
 router.get("/question/:id", QuestionController.show);
-router.post("/question/store", QuestionController.store);
-router.delete("/question/delete/:id", QuestionController.destroy);
-router.put("/question", QuestionController.update);
+router.post(
+  "/question/store",
+  isAuthenticated,
+  isAdmin,
+  QuestionController.store
+);
+router.delete(
+  "/question/delete/:id",
+  isAuthenticated,
+  isAdmin,
+  QuestionController.destroy
+);
+router.put(
+  "/question/update/:id",
+  isAuthenticated,
+  isAdmin,
+  QuestionController.update
+);
 
 module.exports = router;
