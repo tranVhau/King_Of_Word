@@ -3,7 +3,7 @@
 .env file in the root directory
 
 ```bash
-#this NEXT_PUBLIC_GOOGLE_AUTH_URL need to pre-config on google clound console Oauth2
+#this NEXT_PUBLIC_GOOGLE_AUTH_URL need to pre-config on google cloud console Oauth2
 #need other config for your own
 NEXT_PUBLIC_GOOGLE_AUTH_URL=http://localhost:8001/auth/google
 
